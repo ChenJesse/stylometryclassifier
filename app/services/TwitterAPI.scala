@@ -5,7 +5,7 @@ import javax.inject._
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 
-import models.Article
+import models.{Article, Twitter}
 import play.api.libs.json.{JsError, JsPath, JsSuccess, Reads}
 import play.api.libs.ws.WSClient
 import play.api.libs.functional.syntax._
@@ -29,38 +29,49 @@ class TwitterAPI @Inject() (configuration: play.api.Configuration, ws: WSClient)
 
   var bearerToken: Option[String] = None
 
-  def encodedKey = Base64.getEncoder.encodeToString((key._1 + ":" + key._2).getBytes(StandardCharsets.UTF_8))
+  implicit val textReads: Reads[Article] = (
+    (JsPath \ "text").read[String] and
+      (JsPath \ "created_at").read[String]
+    )(Article.apply(_,_,Twitter))
 
-  def authenticate = bearerToken match {
+  def encodedKey = Base64.getEncoder
+    .encodeToString((key._1 + ":" + key._2)
+    .getBytes(StandardCharsets.UTF_8))
+
+  def authenticate(): Boolean = bearerToken match {
     case None =>
-      bearerToken = Some(Await.result(ws.url(oauthRoute).withHeaders (
+      val token: Option[String] = Await.result(ws.url(oauthRoute).withHeaders (
         "Authorization" -> ("Basic " + encodedKey),
         "Content-Type" -> "application/x-www-form-urlencoded;charset=UTF-8"
       ).post("grant_type=client_credentials").map {
         response =>
-          println(response)
-          (response.json \ "access_token").as[String]
-      }, Duration(5, TimeUnit.SECONDS)))
-    case Some(_) => Unit
+          response.status match {
+            case 200 => Some((response.json \ "access_token").as[String])
+            case _ => None
+          }
+      }, Duration(5, TimeUnit.SECONDS))
+      token match {
+        case Some(token) =>
+          bearerToken = Some(token)
+          true
+        case None => false
+      }
+    case Some(_) => true
   }
 
   def fetchArticles(): Future[Seq[Article]] = {
-    authenticate
-    ws.url(tweetRoute).withHeaders (
-      "Authorization" -> ("Bearer " + bearerToken.getOrElse(""))
-    ).withQueryString("q" -> "trump").get().map {
-      response =>
-        println(response)
-        println(response.json)
-        (response.json \ "statuses").validate[Seq[Article]] match {
-        case s: JsSuccess[Seq[Article]] => s.get
-        case _: JsError => Seq.empty
-      }
+    authenticate match {
+      case true =>
+        ws.url(tweetRoute).withHeaders (
+          "Authorization" -> ("Bearer " + bearerToken.getOrElse(""))
+        ).withQueryString("q" -> "trump").get().map {
+          response =>
+            (response.json \ "statuses").validate[Seq[Article]] match {
+            case s: JsSuccess[Seq[Article]] => s.get
+            case _: JsError => Seq.empty
+          }
+        }
+      case false => Future(Seq.empty)
     }
   }
-
-  implicit val textReads: Reads[Article] = (
-      (JsPath \ "text").read[String] and
-      (JsPath \ "created_at").read[String]
-    )(Article.apply _)
 }

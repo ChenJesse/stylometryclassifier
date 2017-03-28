@@ -19,11 +19,12 @@ class TwitterSpec extends PlaySpec with OneAppPerSuite {
       twitterAPI.bearerToken.getOrElse("") must not equal("")
     }
 
-    "fetch tweets correctly" in {
+    "fetch tweets and parse them correctly" in {
       val twitterAPI = app.injector.instanceOf[TwitterAPI]
       twitterAPI.authenticate
       val articles: Seq[Article] = Await.result(twitterAPI.fetchArticles(), Duration(5, TimeUnit.SECONDS))
       articles.length must be > 0
+//      print(articles.map(article => article.getText))
     }
 
   }

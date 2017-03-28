@@ -11,8 +11,8 @@ import play.api.libs.ws.WSClient
 import play.api.libs.functional.syntax._
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.Await
-import models._
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by jessechen on 3/27/17.
@@ -27,37 +27,40 @@ class TwitterAPI @Inject() (configuration: play.api.Configuration, ws: WSClient)
     configuration.underlying.getString("twitter.secret")
   )
 
-  var sessionCode: Option[String] = None
+  var bearerToken: Option[String] = None
 
-  def encode = "Basic " + Base64.getEncoder.encodeToString((key._1 + ":" + key._2).getBytes(StandardCharsets.UTF_8))
+  def encodedKey = Base64.getEncoder.encodeToString((key._1 + ":" + key._2).getBytes(StandardCharsets.UTF_8))
 
-  def authenticate = sessionCode match {
+  def authenticate = bearerToken match {
     case None =>
-      sessionCode = Some(Await.result(ws.url(oauthRoute).withHeaders (
-        "Authorization" -> encode,
+      bearerToken = Some(Await.result(ws.url(oauthRoute).withHeaders (
+        "Authorization" -> ("Basic " + encodedKey),
         "Content-Type" -> "application/x-www-form-urlencoded;charset=UTF-8"
-      ).post().map {
-        response => (response.json \ "access_token").as[String]
-      }, Duration(100, TimeUnit.MILLISECONDS)))
+      ).post("grant_type=client_credentials").map {
+        response =>
+          println(response)
+          (response.json \ "access_token").as[String]
+      }, Duration(5, TimeUnit.SECONDS)))
     case Some(_) => Unit
   }
 
-  def fetchArticles(): Seq[Article] = {
+  def fetchArticles(): Future[Seq[Article]] = {
     authenticate
-    Await.result(ws.url(tweetRoute).withHeaders (
-      "Authorization" -> encode
+    ws.url(tweetRoute).withHeaders (
+      "Authorization" -> ("Bearer " + bearerToken.getOrElse(""))
     ).withQueryString("q" -> "trump").get().map {
       response =>
-        response.json.validate[Seq[Article]] match {
+        println(response)
+        println(response.json)
+        (response.json \ "statuses").validate[Seq[Article]] match {
         case s: JsSuccess[Seq[Article]] => s.get
-        case _: JsError => throw Exception
+        case _: JsError => Seq.empty
       }
-    }, Duration(100, TimeUnit.MILLISECONDS))
+    }
   }
 
   implicit val textReads: Reads[Article] = (
       (JsPath \ "text").read[String] and
       (JsPath \ "created_at").read[String]
     )(Article.apply _)
-
 }

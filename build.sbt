@@ -11,5 +11,6 @@ libraryDependencies += cache
 libraryDependencies += ws
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
 libraryDependencies += "org.scalanlp" %% "breeze" % "0.13"
+libraryDependencies += "org.reactivemongo" %% "play2-reactivemongo" % "0.11.14"
 
 

@@ -6,7 +6,7 @@ import breeze.numerics._
 /**
   * Created by jessechen on 3/28/17.
   */
-class LRClassifier(dimension: Int) extends Classifier {
+class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double) extends Classifier {
   var w: DenseVector[Double] = DenseVector.ones[Double](dimension)
 
   /**
@@ -15,7 +15,7 @@ class LRClassifier(dimension: Int) extends Classifier {
     * @param yTr Labels corresponding to training set, 1xn
     */
   def train(xTr: DenseMatrix[Double], yTr: DenseVector[Int]): Unit = {
-    adagrad(logistic, 1, 1000, 0.0001, xTr, yTr)
+    adagrad(logistic, alpha, maxiter, delta, xTr, yTr)
   }
 
   /**
@@ -59,9 +59,6 @@ class LRClassifier(dimension: Int) extends Classifier {
     */
   def logistic(xTr: DenseMatrix[Double],
                yTr: DenseVector[Int]): DenseVector[Double] = {
-    val n = xTr.rows
-    val d = xTr.cols
-
     val doubleYTR = new DenseVector(yTr.toArray.map(x => x.toDouble))
     val YWX = doubleYTR *:* (xTr(*, ::) dot w)
     var eToTheYWX = exp.inPlace(YWX)

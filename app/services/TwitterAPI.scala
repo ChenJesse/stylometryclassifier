@@ -19,17 +19,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 @Singleton
 class TwitterAPI @Inject() (configuration: play.api.Configuration, ws: WSClient) {
-  val oauthRoute = "https://api.twitter.com/oauth2/token"
-  val tweetRoute = "https://api.twitter.com/1.1/search/tweets.json"
+  private val oauthRoute = "https://api.twitter.com/oauth2/token"
+  private val tweetRoute = "https://api.twitter.com/1.1/search/tweets.json"
 
-  val key = (
+  private val key = (
     configuration.underlying.getString("twitter.key"),
     configuration.underlying.getString("twitter.secret")
   )
 
-  var bearerToken: Option[String] = None
+  private var bearerToken: Option[String] = None
 
-  implicit val textReads: Reads[Article] = (
+  def hasBearerToken = bearerToken match {
+    case Some(_) => true
+    case None => false
+  }
+
+  implicit val articleReads: Reads[Article] = (
     (JsPath \ "text").read[String] and
       (JsPath \ "created_at").read[String]
     )(Article.apply(_,_,Twitter))

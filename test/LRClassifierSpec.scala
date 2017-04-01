@@ -9,7 +9,7 @@ class LRClassifierSpec extends PlaySpec {
   "Logistic regression classifier" should {
 
     "Train w correctly and classify correctly" in {
-      val classifier = new LRClassifier(6)
+      val classifier = new LRClassifier(6, 1, 1000, 0.001)
 
       // Simple matrix to separate positive and negative vectors
       val xTr = DenseMatrix(

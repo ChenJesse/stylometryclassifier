@@ -1,12 +1,13 @@
 package models
 
-import breeze.linalg._
-import breeze.numerics._
+import breeze.linalg.{*, Axis, DenseMatrix, DenseVector, sum}
+import breeze.numerics.exp
 
 /**
   * Created by jessechen on 3/28/17.
   */
-class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double) extends Classifier {
+class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
+                   reg: Option[Regularization]) extends Classifier {
   var w: DenseVector[Double] = DenseVector.ones[Double](dimension)
 
   /**
@@ -28,14 +29,25 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double) e
 
   /**
     *
-    * @param lossFunc A loss funcion that returns the gradient at the given y
+    * @param xTe Test set, nxd
+    * @param yTe Labels corresponding to training set 1xn
+    * @return The Zero-One loss given the labels
+    */
+  def test(xTe: DenseMatrix[Double], yTe: DenseVector[Int]): Double = {
+    classify(xTe: DenseMatrix[Double]).toArray.zip(yTe.toArray)
+      .count(x => x._1 != x._2) / yTe.length.toDouble
+  }
+
+  /**
+    *
+    * @param lossFunc A loss function that returns the gradient at the given y
     * @param alpha Step size
     * @param maxiter Number of iterations before automatically breaking out of loop
     * @param delta Change in w before automatically ending loop
     * @param xTr Training set, nxd
     * @param yTr Labels corresponding to training set, 1xn
     */
-  def adagrad(lossFunc: ((DenseMatrix[Double], DenseVector[Int]) => DenseVector[Double]),
+  private def adagrad(lossFunc: ((DenseMatrix[Double], DenseVector[Int]) => DenseVector[Double]),
               alpha: Double, maxiter: Int, delta: Double,
               xTr: DenseMatrix[Double], yTr: DenseVector[Int]): Unit = {
     var z = DenseVector.zeros[Double](dimension)
@@ -44,7 +56,7 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double) e
       z = z + gradient.map {x => x * x}
       val zEps = z :+= 0.0001
       val alphaGradient = gradient :*= alpha
-      val newW = w + (alphaGradient) /:/ (zEps).map(x => Math.sqrt(x))
+      val newW = w + alphaGradient /:/ zEps.map(x => Math.sqrt(x))
       val diff = newW + (w *:* -1.0)
       if ((diff dot diff) < delta) return
       w = newW
@@ -65,8 +77,10 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double) e
     val numerator = xTr(::, *) *:* doubleYTR
     val denominator = eToTheYWX :+= 1.0
     val gradient = (sum(numerator(::, *) /:/ denominator, Axis._0) :*= -1.0).t
-
-    return gradient
+    reg match {
+      case Some(reg) => gradient + reg.regGradient(w)
+      case None => gradient
+    }
   }
 
   def sign(y: Double): Int = if (y >= 0) { 1 } else { -1 }

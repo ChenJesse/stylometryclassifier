@@ -112,5 +112,38 @@ class LRClassifierSpec extends PlaySpec {
       y(2) mustBe 1
       y(3) mustBe -1
     }
+
+    "Train correctly with realistic values " in {
+      // Train on a realistic training sample (with binary values)
+      val classifier = new LRClassifier(6, 1, 100, 0.001, None)
+
+      val xTr = DenseMatrix(
+        (1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+        (1.0, 0.0, 1.0, 0.0, 0.0, 0.0),
+        (1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+        (1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+        (1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+        (0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+        (0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
+        (0.0, 0.0, 0.0, 0.0, 1.0, 1.0),
+        (0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+        (0.0, 0.0, 0.0, 0.0, 1.0, 1.0)
+      )
+
+      val yTr = DenseVector(1, 1, 1, 1, 1, -1, -1, -1, -1, -1)
+
+      val xTe = DenseMatrix(
+        (1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+        (0.0, 0.0, 0.0, 1.0, 1.0, 1.0),
+        (1.0, 1.0, 0.0, 1.0, 0.0, 0.0)
+      )
+
+      classifier.train(xTr, yTr)
+      val y = classifier.classify(xTe).toArray
+      y.size mustBe 3
+      y(0) mustBe 1
+      y(1) mustBe -1
+      y(2) mustBe 1
+    }
   }
 }

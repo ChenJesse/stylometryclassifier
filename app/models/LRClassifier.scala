@@ -1,6 +1,6 @@
 package models
 
-import breeze.linalg.{*, Axis, DenseMatrix, DenseVector, sum}
+import breeze.linalg.{*, Axis, DenseMatrix, DenseVector, norm, sum}
 import breeze.numerics.exp
 
 /**
@@ -8,7 +8,7 @@ import breeze.numerics.exp
   */
 class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
                    reg: Option[Regularization]) extends Classifier {
-  var w: DenseVector[Double] = DenseVector.ones[Double](dimension)
+  var w: DenseVector[Double] = DenseVector.rand[Double](dimension)
 
   /**
     *
@@ -56,10 +56,10 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
       z = z + gradient.map {x => x * x}
       val zEps = z :+= 0.0001
       val alphaGradient = gradient :*= alpha
-      val newW = w + alphaGradient /:/ zEps.map(x => Math.sqrt(x))
-      val diff = newW + (w *:* -1.0)
-      if ((diff dot diff) < delta) return
+      val newW = w - alphaGradient /:/ zEps.map(x => Math.sqrt(x))
+      if (norm(gradient) < delta) return
       w = newW
+
     }
   }
 
@@ -76,7 +76,7 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
     var eToTheYWX = exp.inPlace(YWX)
     val numerator = xTr(::, *) *:* doubleYTR
     val denominator = eToTheYWX :+= 1.0
-    val gradient = (sum(numerator(::, *) /:/ denominator, Axis._0) :*= -1.0).t
+    val gradient = (sum(numerator(::, *) /:/ denominator, Axis._0) * -1.0).t
     reg match {
       case Some(reg) => gradient + reg.regGradient(w)
       case None => gradient

@@ -25,7 +25,5 @@ class TwitterSpec extends PlaySpec with OneAppPerSuite {
       val articles: Seq[Article] = Await.result(twitterAPI.fetchArticles(), Duration(5, TimeUnit.SECONDS))
       articles.length must be > 0
     }
-
   }
-
 }

@@ -7,8 +7,9 @@ import breeze.numerics.exp
   * Created by jessechen on 3/28/17.
   */
 class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
-                   reg: Option[Regularization]) extends Classifier {
-  var w: DenseVector[Double] = DenseVector.rand[Double](dimension)
+                   reg: Option[Regularization]) extends LinearClassifier {
+  var w = DenseVector.rand[Double](dimension)
+  var b = 0.0
 
   /**
     *
@@ -17,25 +18,6 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
     */
   def train(xTr: DenseMatrix[Double], yTr: DenseVector[Int]): Unit = {
     adagrad(logistic, alpha, maxiter, delta, xTr, yTr)
-  }
-
-  /**
-    *
-    * @param xTe Set of vectors to be classified, nxd
-    * @return Labels corresponding to xTe
-    */
-  def classify(xTe: DenseMatrix[Double]): DenseVector[Int] =
-    new DenseVector((xTe(*, ::) dot w).toArray.map(x => sign(x)))
-
-  /**
-    *
-    * @param xTe Test set, nxd
-    * @param yTe Labels corresponding to training set 1xn
-    * @return The Zero-One loss given the labels
-    */
-  def test(xTe: DenseMatrix[Double], yTe: DenseVector[Int]): Double = {
-    classify(xTe: DenseMatrix[Double]).toArray.zip(yTe.toArray)
-      .count(x => x._1 != x._2) / yTe.length.toDouble
   }
 
   /**
@@ -82,6 +64,4 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
       case None => gradient
     }
   }
-
-  def sign(y: Double): Int = if (y >= 0) { 1 } else { -1 }
 }

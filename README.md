@@ -16,3 +16,9 @@ sbt run
 ```
 
 And then go to http://localhost:9000 
+
+## Testing
+
+```
+sbt test
+```

@@ -6,10 +6,10 @@ import breeze.numerics.log
 /**
   * Created by jessechen on 3/28/17.
   */
-class NBClassifier(dimension: Int) {
+class NBClassifier(dimension: Int) extends LinearClassifier {
 
-  var w: DenseVector[Double] = DenseVector.ones[Double](dimension)
-  var b: Double = 0.0
+  var w = DenseVector.ones[Double](dimension)
+  var b = 0.0
 
   /**
     *
@@ -31,21 +31,21 @@ class NBClassifier(dimension: Int) {
     val xTrSmooth = DenseMatrix.vertcat(xTr, DenseMatrix.ones[Double](2, dim))
     val yTrSmooth = DenseVector.vertcat(yTr, DenseVector(1, -1))
 
-    val yTrSmoothPos: DenseVector[Double] = yTrSmooth.map(x => if (x == -1) 0 else x.toDouble)
-    val yTrSmoothNeg: DenseVector[Double] = yTrSmooth.map(x => if (x == 1) 0 else x.toDouble)
+    val yTrSmoothPos = yTrSmooth.map(x => if (x == -1) 0 else x.toDouble)
+    val yTrSmoothNeg = yTrSmooth.map(x => if (x == 1) 0 else x.toDouble)
 
-    val posYTotal: Double = yTrSmoothPos dot sum(xTrSmooth, Axis._1)
-    val negYTotal: Double = -1 * (yTrSmoothNeg dot sum(xTrSmooth, Axis._1))
+    val posYTotal = yTrSmoothPos dot sum(xTrSmooth, Axis._1)
+    val negYTotal = -1 * (yTrSmoothNeg dot sum(xTrSmooth, Axis._1))
 
-    val posProb: DenseVector[Double] = (xTrSmooth(::, *) dot yTrSmoothPos).t / posYTotal
-    val negProb: DenseVector[Double] = (xTrSmooth(::, *) dot yTrSmoothNeg).t / (-1 * negYTotal)
+    val posProb = (xTrSmooth(::, *) dot yTrSmoothPos).t / posYTotal
+    val negProb = (xTrSmooth(::, *) dot yTrSmoothNeg).t / (-1 * negYTotal)
 
     (posProb, negProb)
   }
 
   private def naiveBayesCL(xTr: DenseMatrix[Double], yTr: DenseVector[Int]): (DenseVector[Double], Double) = {
     val (posThetas, negThetas) = naiveBayesPXY(xTr, yTr)
-    val w: DenseVector[Double] = log(posThetas) - log(negThetas)
+    val w = log(posThetas) - log(negThetas)
 
     val (posPi, negPi) = naiveBayesPY(yTr)
     val b = log(posPi) - log(negPi)
@@ -63,25 +63,4 @@ class NBClassifier(dimension: Int) {
     w = trainedW
     b = trainedB
   }
-
-  /**
-    *
-    * @param xTe Set of vectors to be classified, nxd
-    * @return Labels corresponding to xTe
-    */
-  def classify(xTe: DenseMatrix[Double]): DenseVector[Int] =
-    new DenseVector((xTe(*, ::) dot w).toArray.map(x => sign(x + b)))
-
-  /**
-    *
-    * @param xTe Test set, nxd
-    * @param yTe Labels corresponding to training set 1xn
-    * @return The Zero-One loss given the labels
-    */
-  def test(xTe: DenseMatrix[Double], yTe: DenseVector[Int]): Double = {
-    classify(xTe: DenseMatrix[Double]).toArray.zip(yTe.toArray)
-      .count(x => x._1 != x._2) / yTe.length.toDouble
-  }
-
-  def sign(y: Double): Int = if (y >= 0) { 1 } else { -1 }
 }

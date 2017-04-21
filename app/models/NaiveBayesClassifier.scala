@@ -6,7 +6,7 @@ import breeze.numerics.log
 /**
   * Created by jessechen on 3/28/17.
   */
-class NBClassifier(dimension: Int) extends LinearClassifier {
+class NaiveBayesClassifier(dimension: Int) extends LinearClassifier {
 
   var w = DenseVector.ones[Double](dimension)
   var b = 0.0
@@ -26,6 +26,14 @@ class NBClassifier(dimension: Int) extends LinearClassifier {
     (posRatio, 1.0 - posRatio)
   }
 
+  /**
+    * Finds the probability of P(X|Y=(-1 or 1)) with +1 smoothing
+    * @param xTr Training set, nxd (n is number of data points, d is dimension)
+    * @param yTr Labels corresponding to training set, 1xn
+    * @return A tuple with the first element being a 1xd vector of probabilities
+    *         P(X_i|Y=1), and the second being a 1xd vector of probabilities
+    *         P(X_i|Y=-1)
+    */
   private def naiveBayesPXY(xTr: DenseMatrix[Double], yTr: DenseVector[Int]): (DenseVector[Double], DenseVector[Double]) = {
     val dim = xTr.cols
     val xTrSmooth = DenseMatrix.vertcat(xTr, DenseMatrix.ones[Double](2, dim))

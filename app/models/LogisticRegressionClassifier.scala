@@ -6,8 +6,8 @@ import breeze.numerics.exp
 /**
   * Created by jessechen on 3/28/17.
   */
-class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
-                   reg: Option[Regularization]) extends LinearClassifier {
+class LogisticRegressionClassifier(dimension: Int, reg: Option[Regularization] = None, alpha: Double = 1,
+                                   maxiter: Int = 1000, delta: Double = 0.001) extends LinearClassifier {
   var w = DenseVector.rand[Double](dimension)
   var b = 0.0
 
@@ -41,7 +41,6 @@ class LRClassifier(dimension: Int, alpha: Double, maxiter: Int, delta: Double,
       val newW = w - alphaGradient /:/ zEps.map(x => Math.sqrt(x))
       if (norm(gradient) < delta) return
       w = newW
-
     }
   }
 

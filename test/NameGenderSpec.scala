@@ -9,8 +9,8 @@ class NameGenderSpec extends PlaySpec {
   "Our classifiers" should {
 
     "Train w and b correctly and classify boys/girls names" in {
-      val boysNames = scala.io.Source.fromFile("test/boys.txt").mkString.split('\n')
-      val girlsNames = scala.io.Source.fromFile("test/girls.txt").mkString.split('\n')
+      val boysNames = scala.io.Source.fromFile("app/resources/boys.txt").mkString.split('\n')
+      val girlsNames = scala.io.Source.fromFile("app/resources/girls.txt").mkString.split('\n')
       val dimension = 2000
 
       def nameToList(name: String): List[Double] = {

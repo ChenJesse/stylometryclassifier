@@ -26,4 +26,8 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
 
     return document
   }
+
+  def isTrained(): Boolean = {
+    false
+  }
 }

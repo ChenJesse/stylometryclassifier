@@ -1,5 +1,5 @@
-import breeze.linalg.{DenseMatrix, DenseVector}
-import models.{LogisticRegressionClassifier, NaiveBayesClassifier}
+import models.BinaryLabel.{LabelA, LabelB}
+import models._
 import org.scalatestplus.play.PlaySpec
 
 /**
@@ -8,67 +8,56 @@ import org.scalatestplus.play.PlaySpec
 class NameGenderSpec extends PlaySpec {
   "Our classifiers" should {
 
-    "Train w and b correctly and classify boys/girls names" in {
+    "Train w and b correctly and classify boys/girls names using wrappers" in {
       val boysNames = scala.io.Source.fromFile("app/resources/boys.txt").mkString.split('\n')
       val girlsNames = scala.io.Source.fromFile("app/resources/girls.txt").mkString.split('\n')
       val dimension = 2000
-
-      def nameToList(name: String): List[Double] = {
-        val vectorArray = Array.fill[Double](dimension)(0)
-        for (i <- 0 to 7) {
-          var featureString = "prefix" + name.slice(0, i)
-          vectorArray(Math.abs(featureString.hashCode) % dimension) = 1.0
-          featureString = "suffix" + name.slice(name.length - i, name.length)
-          vectorArray(Math.abs(featureString.hashCode) % dimension) = 1.0
-        }
-        vectorArray.toList
-      }
-
-      val boysVectors = boysNames.map(name => nameToList(name)).toList
-      val girlsVectors = girlsNames.map(name => nameToList(name)).toList
-      val boysLabels = List.fill[Int](boysVectors.length)(1)
-      val girlsLabels = List.fill[Int](girlsVectors.length)(-1)
-      val vectors = boysVectors ++ girlsVectors
-      val labels = boysLabels ++ girlsLabels
-      val xTr: DenseMatrix[Double] = new DenseMatrix(dimension, labels.length, vectors.flatten.toArray).t
-      val yTr: DenseVector[Int] = DenseVector(labels.toArray)
+      val boys = boysNames.map(name => new Name(name))
+      val girls = girlsNames.map(name => new Name(name))
+      val boysLabels = List.fill[Int](boys.length)(1)
+      val girlsLabels = List.fill[Int](girls.length)(-1)
+      val all = boys ++ girls
+      val labels = (boysLabels ++ girlsLabels).map(int => BinaryLabel.toLabel(int))
 
       val nbClassifier = new NaiveBayesClassifier(dimension)
-      val lrClassifier = new LogisticRegressionClassifier(dimension)
+      val lrClassifier = new LogisticRegressionClassifier(dimension, Some(Regularization(1, L2Reg)))
 
-      nbClassifier.train(xTr, yTr)
-      lrClassifier.train(xTr, yTr)
+      val nbClassifierWrapper = new ClassifierWrapper[Name](nbClassifier)
+      val lrClassifierWrapper = new ClassifierWrapper[Name](lrClassifier)
 
-      val nbTrainingError = nbClassifier.test(xTr, yTr)
-      val lrTrainingError = lrClassifier.test(xTr, yTr)
+      nbClassifierWrapper.train(all, labels)
+      lrClassifierWrapper.train(all, labels)
+
+      val nbTrainingError = nbClassifierWrapper.test(all, labels)
+      val lrTrainingError = lrClassifierWrapper.test(all, labels)
       println("Naive bayes training error: " + nbTrainingError)
       println("Logistic regression training error: " + lrTrainingError)
       assert(nbTrainingError < 0.10)
       assert(lrTrainingError < 0.10)
 
-      val xTe = DenseMatrix(
-        nameToList("Julian"),
-        nameToList("Marco"),
-        nameToList("Danielle"),
-        nameToList("Carolina"),
-        nameToList("Rachel")
+      val xTe = List(
+        new Name("Julian"),
+        new Name("Marco"),
+        new Name("Danielle"),
+        new Name("Carolina"),
+        new Name("Rachel")
       )
 
-      val yNB = nbClassifier.classify(xTe).toArray
-      val yLR = lrClassifier.classify(xTe).toArray
+      val yNB = nbClassifierWrapper.classify(xTe).toArray
+      val yLR = lrClassifierWrapper.classify(xTe).toArray
       yNB.length mustBe 5
       yLR.length mustBe 5
-      yNB(0) mustBe 1
-      yNB(1) mustBe 1
-      yNB(2) mustBe -1
-      yNB(3) mustBe -1
-      yNB(4) mustBe -1
+      yNB(0) mustBe LabelA
+      yNB(1) mustBe LabelA
+      yNB(2) mustBe LabelB
+      yNB(3) mustBe LabelB
+      yNB(4) mustBe LabelB
 
-      yLR(0) mustBe 1
-      yLR(1) mustBe 1
-      yLR(2) mustBe -1
-      yLR(3) mustBe -1
-      yLR(4) mustBe -1
+      yLR(0) mustBe LabelA
+      yLR(1) mustBe LabelA
+      yLR(2) mustBe LabelB
+      yLR(3) mustBe LabelB
+      yLR(4) mustBe LabelB
     }
 
   }

@@ -6,7 +6,9 @@ import breeze.linalg.DenseVector
   * Created by jessechen on 3/27/17.
   */
 
-class Article(text: String, date: String, source: Source) {
+class Article(text: String, date: String, source: Source) extends Vectorizable {
+  val dimension = 3000
+
   def sanitize(): String = {
     val sanitizedText = text.trim()
       .replaceAll('\"'.toString, "")
@@ -19,7 +21,7 @@ class Article(text: String, date: String, source: Source) {
     stopWords.foldLeft(sanitizedText)((sanitizedText, stopWord) => sanitizedText.replaceAll(stopWord, " "))
   }
 
-  def vectorize(dimension: Int): DenseVector[Double] = {
+  def vectorize(): DenseVector[Double] = {
     val vectorArray = Array.fill[Double](dimension)(0)
     var tokens = text.trim().split(Array('.', ' ', '!', ';', ':', '?'))
     tokens = tokens.map(token => token.trim())

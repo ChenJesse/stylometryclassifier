@@ -24,7 +24,7 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
     collection.insert(Json.obj("article" -> "Lorem ipsum"))
     val document = Await.result(collection.find(Json.obj()).one[JsObject], Duration(5, TimeUnit.SECONDS))
 
-    return document
+    document
   }
 
   def isTrained(): Boolean = {

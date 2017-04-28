@@ -1,4 +1,4 @@
-package models
+package classifiers
 
 import breeze.linalg.{*, Axis, DenseMatrix, DenseVector, sum}
 import breeze.numerics.log

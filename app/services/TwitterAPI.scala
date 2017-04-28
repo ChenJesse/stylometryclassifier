@@ -5,7 +5,7 @@ import javax.inject._
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 
-import models.{Article, Twitter}
+import models.{Tweet}
 import play.api.libs.json.{JsError, JsPath, JsSuccess, Reads}
 import play.api.libs.ws.WSClient
 import play.api.libs.functional.syntax._
@@ -34,14 +34,14 @@ class TwitterAPI @Inject() (configuration: play.api.Configuration, ws: WSClient)
     case None => false
   }
 
-  implicit val articleReads: Reads[Article] = (
+  implicit val articleReads: Reads[Tweet] = (
     (JsPath \ "text").read[String] and
       (JsPath \ "created_at").read[String]
-    )(Article.apply(_,_,Twitter))
+    )(Tweet.apply _)
 
   def encodedKey = Base64.getEncoder
     .encodeToString((key._1 + ":" + key._2)
-    .getBytes(StandardCharsets.UTF_8))
+      .getBytes(StandardCharsets.UTF_8))
 
   def authenticate(): Boolean = bearerToken match {
     case None =>
@@ -64,17 +64,17 @@ class TwitterAPI @Inject() (configuration: play.api.Configuration, ws: WSClient)
     case Some(_) => true
   }
 
-  def fetchArticles(): Future[Seq[Article]] = {
+  def fetchArticles(): Future[Seq[Tweet]] = {
     authenticate match {
       case true =>
         ws.url(tweetRoute).withHeaders (
           "Authorization" -> ("Bearer " + bearerToken.getOrElse(""))
         ).withQueryString("q" -> "trump").get().map {
           response =>
-            (response.json \ "statuses").validate[Seq[Article]] match {
-            case s: JsSuccess[Seq[Article]] => s.get
-            case _: JsError => Seq.empty
-          }
+            (response.json \ "statuses").validate[Seq[Tweet]] match {
+              case s: JsSuccess[Seq[Tweet]] => s.get
+              case _: JsError => Seq.empty
+            }
         }
       case false => Future(Seq.empty)
     }

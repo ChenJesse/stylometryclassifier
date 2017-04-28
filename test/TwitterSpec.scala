@@ -1,6 +1,6 @@
 import java.util.concurrent.TimeUnit
 
-import models.Article
+import models.Tweet
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import services.TwitterAPI
 
@@ -22,7 +22,7 @@ class TwitterSpec extends PlaySpec with OneAppPerSuite {
     "fetch tweets and parse them correctly" in {
       val twitterAPI = app.injector.instanceOf[TwitterAPI]
       twitterAPI.authenticate
-      val articles: Seq[Article] = Await.result(twitterAPI.fetchArticles(), Duration(5, TimeUnit.SECONDS))
+      val articles: Seq[Tweet] = Await.result(twitterAPI.fetchArticles(), Duration(5, TimeUnit.SECONDS))
       articles.length must be > 0
     }
   }

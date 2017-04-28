@@ -1,6 +1,7 @@
-package models
+package classifiers
 
 import breeze.linalg.{DenseMatrix, DenseVector}
+import models.Vectorizable
 
 /**
   * Created by jessechen on 4/23/17.

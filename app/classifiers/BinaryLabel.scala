@@ -1,4 +1,4 @@
-package models
+package classifiers
 
 /**
   * Created by jessechen on 4/23/17.

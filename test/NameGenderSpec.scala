@@ -1,4 +1,5 @@
-import models.BinaryLabel.{LabelA, LabelB}
+import classifiers._
+import classifiers.BinaryLabel.{LabelA, LabelB}
 import models._
 import org.scalatestplus.play.PlaySpec
 

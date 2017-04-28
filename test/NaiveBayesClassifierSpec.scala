@@ -1,5 +1,5 @@
 import breeze.linalg.{DenseMatrix, DenseVector}
-import models.NaiveBayesClassifier
+import classifiers.NaiveBayesClassifier
 import org.scalatestplus.play.PlaySpec
 
 /**

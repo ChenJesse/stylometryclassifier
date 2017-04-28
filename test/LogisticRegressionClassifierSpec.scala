@@ -1,4 +1,5 @@
 import breeze.linalg.{DenseMatrix, DenseVector}
+import classifiers.{L1Reg, L2Reg, LogisticRegressionClassifier, Regularization}
 import models._
 import org.scalatestplus.play.PlaySpec
 

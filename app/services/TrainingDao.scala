@@ -2,13 +2,15 @@ package services
 
 import java.util.concurrent.TimeUnit
 
+import breeze.linalg.DenseVector
 import com.google.inject.{Inject, Singleton}
+import models.Author
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
@@ -27,7 +29,40 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
     document
   }
 
-  def isTrained(): Boolean = {
-    false
+  def getClassifierParams(author: Author): Future[Option[(DenseVector[Double], Double)]] = {
+    try {
+      val cursor = getAuthorCollection(author).find(Json.obj()).cursor[JsObject]
+      val futureJson = cursor.collect[List]()
+      futureJson.map { json =>
+        if (json.nonEmpty) {
+          (json.head \ "isTrained").as[Boolean] match {
+            case true => Some(DenseVector((json.head \ "w").as[List[Double]].toArray), (json.head \ "b").as[Double])
+            case false => None
+          }
+        } else {
+          None
+        }
+      }
+    } catch {
+      case _: Throwable => Future(None)
+    }
   }
+
+  def persistClassifierParams(author: Author, w: DenseVector[Double], b: Double): Boolean = {
+    try {
+      val collection = getAuthorCollection(author)
+      collection.remove(Json.obj())
+      collection.insert(Json.obj("isTrained" -> true, "w" -> w.toArray, "b" -> b))
+      true
+    } catch {
+      case _: Throwable => false
+    }
+  }
+
+  def clearClassifierParams(author: Author) = getAuthorCollection(author).remove(Json.obj())
+
+
+  def getAuthorCollection(author: Author): JSONCollection =
+    Await.result(reactiveMongoAPI.database.map(_.collection[JSONCollection](author.name)), Duration(5, TimeUnit.SECONDS))
+
 }

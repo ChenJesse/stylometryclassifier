@@ -9,6 +9,8 @@ import models.Vectorizable
   */
 @Singleton
 class TrainClassifiers @Inject() (trainingDao: TrainingDao) {
+  def train(): Unit = {
 
+  }
 
 }

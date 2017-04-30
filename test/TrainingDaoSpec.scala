@@ -1,7 +1,6 @@
 import java.util.concurrent.TimeUnit
 
 import breeze.linalg.DenseVector
-import models.Author
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import services.TrainingDao
 
@@ -23,17 +22,14 @@ class TrainingDaoSpec extends PlaySpec with OneAppPerSuite {
 
     "be able to store and retrieve parameter information" in {
       val trainingDao = app.injector.instanceOf[TrainingDao]
-      case object TestAuthor extends Author {
-        val name = "testauthor"
-      }
 
-      trainingDao.clearClassifierParams(TestAuthor)
+      trainingDao.clearClassifierParams
 
-      var params = Await.result(trainingDao.getClassifierParams(TestAuthor), Duration(5, TimeUnit.SECONDS))
+      var params = Await.result(trainingDao.getClassifierParams(), Duration(5, TimeUnit.SECONDS))
       params mustBe None
 
-      trainingDao.persistClassifierParams(TestAuthor, DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23)
-      params = Await.result(trainingDao.getClassifierParams(TestAuthor), Duration(5, TimeUnit.SECONDS))
+      trainingDao.persistClassifierParams(DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23)
+      params = Await.result(trainingDao.getClassifierParams(), Duration(5, TimeUnit.SECONDS))
       params mustBe Some(DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23)
     }
 

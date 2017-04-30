@@ -29,4 +29,9 @@ abstract class LinearClassifier extends Classifier {
   }
 
   def sign(y: Double): Int = if (y >= 0) { 1 } else { -1 }
+
+  def loadParams(newW: DenseVector[Double], newB: Double): Unit = {
+    w = newW
+    b = newB
+  }
 }

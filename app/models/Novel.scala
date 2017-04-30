@@ -1,32 +1,19 @@
 package models
 
-import breeze.linalg.DenseVector
+import epic.preprocess.MLSentenceSegmenter
 
 /**
   * Created by jessechen on 3/27/17.
   */
 
-class Novel(text: String) extends Text(text) {
-  val dimension = 10000
+class Novel(title: String, segmentLength: Int, author: Author) {
+  var segments: Seq[Segment] = Seq()
 
-  def tokenize(): Array[String] = {
-    val stopWords = scala.io.Source.fromFile("app/resources/stopwords.txt").mkString
-      .split('\n')
-    text.split(" ").map(token =>
-        token.trim()
-          .toLowerCase
-          .replaceAll("[-~!@#$^%&*()_+={}\\\\[\\\\]|;:\\\"'`<,>.?/\\\\\\\\]", "")
-      ).filter(token => !stopWords.contains(token))
-  }
-
-  def vectorize(): DenseVector[Double] = {
-    val vectorArray = Array.fill[Double](dimension)(0)
-    var tokens = text.trim().split(Array('.', ' ', '!', ';', ':', '?'))
-    tokens = tokens.map(token => token.trim())
-    tokens.foreach {token =>
-      val index = Math.abs(token.hashCode()) % dimension
-      vectorArray(index) = 1.0
-    }
-    DenseVector[Double](vectorArray)
+  def loadSegments(): Unit = {
+    val novelText = scala.io.Source.fromFile("app/resources/training/" + title).mkString
+    val sentenceSplitter = MLSentenceSegmenter.bundled().get
+    val tokenizer = new epic.preprocess.TreebankTokenizer()
+    val sentences: IndexedSeq[IndexedSeq[String]] = sentenceSplitter(novelText).map(tokenizer).toIndexedSeq
+    segments = sentences.sliding(segmentLength, segmentLength).toList.map(segment => new Segment(segment))
   }
 }

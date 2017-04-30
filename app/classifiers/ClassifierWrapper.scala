@@ -27,4 +27,12 @@ class ClassifierWrapper[T <: Vectorizable](classifier: Classifier) {
   }
 
   def seqLabelToVector(seq: Seq[Label]) = DenseVector(seq.map(y => BinaryLabel.toInt(y)).toArray)
+
+  def loadParams(w: DenseVector[Double], b: Double): Unit = {
+    try {
+      classifier.asInstanceOf[LinearClassifier].loadParams(w, b)
+    } catch {
+      case _: Exception =>
+    }
+  }
 }

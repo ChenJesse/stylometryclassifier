@@ -5,24 +5,27 @@ package models
   */
 trait Author {
   val name: String
-  val novelData: Seq[(String, Int)]
-  val novels = novelData.map { case (title: String, chapters: Int) => new Novel(title, chapters, Tolkien) }
+  val novelData: Seq[String] = Seq()
+  var novels: Seq[Novel] = Seq()
+  def loadNovels = {
+    novels = novelData.map { title => new Novel(title, 10) }
+  }
 }
 case object Tolkien extends Author {
   val name = "Tolkien"
-  val novelData = Seq(
-    ("The Fellowship of the Ring", 22),
-    ("The Two Towers", 21),
-    ("The Return of the King", 19)
+  override val novelData = Seq(
+    "The Fellowship of the Ring",
+    "The Two Towers",
+    "The Return of the King"
   )
 }
 case object Martin extends Author {
   val name = "Martin"
-  val novelData = Seq(
-    ("A Game of Thrones", 73),
-    ("A Clash of Kings", 70),
-    ("A Storm of Swords", 82),
-    ("A Feast for Crows", 46),
-    ("A Dance with Dragons", 73)
+  override val novelData = Seq(
+    "A Game of Thrones",
+    "A Clash of Kings",
+    "A Storm of Swords",
+    "A Feast for Crows",
+    "A Dance with Dragons"
   )
 }

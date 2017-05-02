@@ -1,5 +1,7 @@
+import classifiers.BinaryLabel.{LabelA, LabelB}
+import classifiers.{ClassifierWrapper, LogisticRegressionClassifier, Regularization}
 import edu.stanford.nlp.simple.{Document, Sentence}
-import models.{Author, Segment}
+import models.{Author, Martin, Segment, Tolkien}
 import org.scalatestplus.play.PlaySpec
 
 /**
@@ -35,6 +37,27 @@ class SegmentVectorizationSpec extends PlaySpec {
       TestMartin.novels.head.loadSegments()
       TestMartin.novels.head.title mustBe "agameofthrones"
       TestMartin.novels.head.segments.length mustBe 2485
+
+      val reconstructedText = TestMartin.novels.head.segments.flatMap(_.sentences.map(_.toString)).mkString(" ")
+      val text = scala.io.Source.fromFile("app/resources/training/agameofthrones.txt").mkString
+      println(reconstructedText.length)
+      println(text.length)
     }
+
+    //TAKES TOO LONG TO RUN, APPROX 20 MIN
+//    "should be able to classify Tolkien vs Martin with reasonably training error" in {
+//      Tolkien.loadNovels
+//      Martin.loadNovels
+//      Tolkien.novels.foreach(novel => novel.loadSegments())
+//      Martin.novels.foreach(novel => novel.loadSegments())
+//      val segmentsA = Tolkien.novels.flatMap(novel => novel.segments)
+//      val segmentsB = Martin.novels.flatMap(novel => novel.segments)
+//      val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
+//      val classifier = new ClassifierWrapper[Segment](
+//        new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
+//      )
+//      classifier.train(segmentsA ++ segmentsB, labels)
+//      println(classifier.test(segmentsA ++ segmentsB, labels))
+//    }
   }
 }

@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import classifiers.BinaryLabel.{LabelA, LabelB}
 import classifiers.ClassifierWrapper
 import com.google.inject.{Inject, Singleton}
-import models.{Author, Segment}
+import models.{Author, Martin, Segment, Tolkien}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -16,6 +16,8 @@ import scala.concurrent.duration.Duration
 @Singleton
 class ClassifierManager @Inject()(trainingDao: TrainingDao) {
   private def train(classifier: ClassifierWrapper[Segment], authorA: Author, authorB: Author): Unit = {
+    Tolkien.loadNovels
+    Martin.loadNovels
     authorA.novels.foreach(novel => novel.loadSegments())
     authorB.novels.foreach(novel => novel.loadSegments())
     val segmentsA = authorA.novels.flatMap(novel => novel.segments)

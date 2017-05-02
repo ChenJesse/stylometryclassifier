@@ -14,9 +14,9 @@ trait Author {
 case object Tolkien extends Author {
   val name = "Tolkien"
   override val novelData = Seq(
-    "The Fellowship of the Ring",
-    "The Two Towers",
-    "The Return of the King"
+    "thefellowshipofthering",
+    "thetwotowers",
+    "thereturnoftheking"
   )
 }
 case object Martin extends Author {
@@ -24,8 +24,6 @@ case object Martin extends Author {
   override val novelData = Seq(
     "agameofthrones",
     "aclashofkings",
-    "astormofswords",
-    "A Feast for Crows",
-    "A Dance with Dragons"
+    "astormofswords"
   )
 }

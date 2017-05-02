@@ -7,7 +7,7 @@ import edu.stanford.nlp.simple._
   * Created by jessechen on 4/29/17.
   */
 class Segment(val sentences: List[Sentence]) extends Vectorizable {
-  val dimension = 70
+  val dimension = Segment.defaultDimension
 
   /**
     * Vectorize on:
@@ -49,4 +49,5 @@ object Segment {
   val partsOfSpeech = scala.io.Source.fromFile("app/resources/training/pos.txt").mkString.split("\n").map(_.trim())
   val commonConjunctions = List("for", "and", "nor", "but", "or", "yet", "so")
   val commonPronouns = List("she", "he", "her", "him", "his", "hers")
+  val defaultDimension = 70
 }

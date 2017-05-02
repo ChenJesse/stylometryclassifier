@@ -22,7 +22,7 @@ class ClassifierWrapper[T <: Vectorizable](classifier: Classifier) {
   }
 
   def seqToMatrix(seq: Seq[T]): DenseMatrix[Double] = {
-    val vectors = seq.map(x => x.vectorize())
+    val vectors = seq.map(_.vectorize())
     DenseMatrix.tabulate(vectors.size, vectors.head.length) { case (i, j) => vectors(i).valueAt(j) }
   }
 

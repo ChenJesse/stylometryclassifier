@@ -21,8 +21,8 @@ class SegmentVectorizationSpec extends PlaySpec {
       segments.length mustBe 5
       segments.flatMap(segment => segment.sentences) mustBe sentences
       println(segments.head.sentences)
-      println(segments.head.sentences.map(sentence => sentence.posTags()))
-      segments.flatMap(segment => segment.sentences.map(sentence => sentence.toString)).mkString(" ") mustBe novelText
+      println(segments.head.sentences.map(_.posTags()))
+      segments.flatMap(segment => segment.sentences.map(_.toString)).mkString(" ") mustBe novelText
     }
 
     "should be able to parse a novel correctly" in {
@@ -34,7 +34,7 @@ class SegmentVectorizationSpec extends PlaySpec {
       TestMartin.loadNovels
       TestMartin.novels.head.loadSegments()
       TestMartin.novels.head.title mustBe "agameofthrones"
-      TestMartin.novels.head.getSegments.length mustBe 2485
+      TestMartin.novels.head.segments.length mustBe 2485
     }
   }
 }

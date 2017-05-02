@@ -22,9 +22,9 @@ case object Tolkien extends Author {
 case object Martin extends Author {
   val name = "Martin"
   override val novelData = Seq(
-    "A Game of Thrones",
-    "A Clash of Kings",
-    "A Storm of Swords",
+    "agameofthrones",
+    "aclashofkings",
+    "astormofswords",
     "A Feast for Crows",
     "A Dance with Dragons"
   )

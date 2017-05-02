@@ -52,7 +52,7 @@ class LogisticRegressionClassifier(dimension: Int, reg: Option[Regularization] =
     */
   def logistic(xTr: DenseMatrix[Double],
                yTr: DenseVector[Int]): DenseVector[Double] = {
-    val doubleYTR = new DenseVector(yTr.toArray.map(x => x.toDouble))
+    val doubleYTR = new DenseVector(yTr.toArray.map(_.toDouble))
     val YWX = doubleYTR *:* (xTr(*, ::) dot w)
     var eToTheYWX = exp.inPlace(YWX)
     val numerator = xTr(::, *) *:* doubleYTR

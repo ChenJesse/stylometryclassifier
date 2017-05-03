@@ -5,25 +5,36 @@ package models
   */
 trait Author {
   val name: String
-  val novelData: Seq[String] = Seq()
+  val novelDataTrain: Seq[String] = Seq()
+  val novelDataValidate: Seq[String] = Seq()
+  var novelTrain: Seq[Novel] = Seq()
+  var novelValidate: Seq[Novel] = Seq()
   var novels: Seq[Novel] = Seq()
   def loadNovels = {
-    novels = novelData.map { title => new Novel(title, 10) }
+    if (novels.isEmpty) {
+      novelTrain = novelDataTrain.map { title => new Novel(title, 10) }
+      novelValidate = novelDataValidate.map { title => new Novel(title, 10) }
+      novels = novelTrain ++ novelValidate
+    }
   }
 }
 case object Tolkien extends Author {
   val name = "Tolkien"
-  override val novelData = Seq(
+  override val novelDataTrain = Seq(
     "thefellowshipofthering",
-    "thetwotowers",
+    "thetwotowers"
+  )
+  override val novelDataValidate: Seq[String] = Seq(
     "thereturnoftheking"
   )
 }
 case object Martin extends Author {
   val name = "Martin"
-  override val novelData = Seq(
+  override val novelDataTrain = Seq(
     "agameofthrones",
-    "aclashofkings",
+    "aclashofkings"
+  )
+  override val novelDataValidate: Seq[String] = Seq(
     "astormofswords"
   )
 }

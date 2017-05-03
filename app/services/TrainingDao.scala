@@ -28,9 +28,9 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
     document
   }
 
-  def getClassifierParams(): Future[Option[(DenseVector[Double], Double)]] = {
+  def getClassifierParams(collectionName: String): Future[Option[(DenseVector[Double], Double)]] = {
     try {
-      val cursor = getDefaultCollection().find(Json.obj()).cursor[JsObject]()
+      val cursor = getCollection(collectionName).find(Json.obj()).cursor[JsObject]()
       val futureJson = cursor.collect[List]()
       futureJson.map { json =>
         if (json.nonEmpty) {
@@ -47,9 +47,9 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
     }
   }
 
-  def persistClassifierParams(w: DenseVector[Double], b: Double): Boolean = {
+  def persistClassifierParams(w: DenseVector[Double], b: Double, collectionName: String): Boolean = {
     try {
-      val collection = getDefaultCollection()
+      val collection = getCollection(collectionName)
       collection.remove(Json.obj())
       collection.insert(Json.obj("isTrained" -> true, "w" -> w.toArray, "b" -> b))
       true
@@ -58,10 +58,12 @@ class TrainingDao @Inject() (reactiveMongoAPI: ReactiveMongoApi) {
     }
   }
 
-  def clearClassifierParams = getDefaultCollection().remove(Json.obj())
-
+  def clearClassifierParams(name: String) = getCollection(name).remove(Json.obj())
 
   def getDefaultCollection(): JSONCollection =
     Await.result(reactiveMongoAPI.database.map(_.collection[JSONCollection]("default")), Duration(5, TimeUnit.SECONDS))
+
+  def getCollection(name: String) =
+    Await.result(reactiveMongoAPI.database.map(_.collection[JSONCollection](name)), Duration(5, TimeUnit.SECONDS))
 
 }

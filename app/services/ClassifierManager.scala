@@ -3,7 +3,7 @@ package services
 import java.util.concurrent.TimeUnit
 
 import classifiers.BinaryLabel.{LabelA, LabelB}
-import classifiers.ClassifierWrapper
+import classifiers.LinearClassifierWrapper
 import com.google.inject.{Inject, Singleton}
 import models.{Author, Martin, Segment, Tolkien}
 
@@ -15,27 +15,43 @@ import scala.concurrent.duration.Duration
   */
 @Singleton
 class ClassifierManager @Inject()(trainingDao: TrainingDao) {
-  private def train(classifier: ClassifierWrapper[Segment], authorA: Author, authorB: Author): Unit = {
+  def train(classifier: LinearClassifierWrapper[Segment], authorA: Author, authorB: Author): Unit = {
     Tolkien.loadNovels
     Martin.loadNovels
-    authorA.novels.foreach(novel => novel.loadSegments())
-    authorB.novels.foreach(novel => novel.loadSegments())
-    val segmentsA = authorA.novels.flatMap(novel => novel.segments)
-    val segmentsB = authorB.novels.flatMap(novel => novel.segments)
+    authorA.novelTrain.foreach(novel => novel.loadSegments())
+    authorB.novelTrain.foreach(novel => novel.loadSegments())
+    val segmentsA = authorA.novelTrain.flatMap(novel => novel.segments)
+    val segmentsB = authorB.novelTrain.flatMap(novel => novel.segments)
     val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
     classifier.train(segmentsA ++ segmentsB, labels)
   }
 
+  def validate(classifier: LinearClassifierWrapper[Segment], authorA: Author, authorB: Author): Double = {
+    Tolkien.loadNovels
+    Martin.loadNovels
+    authorA.novelValidate.foreach(novel => novel.loadSegments())
+    authorB.novelValidate.foreach(novel => novel.loadSegments())
+    val segmentsA = authorA.novelValidate.flatMap(novel => novel.segments)
+    val segmentsB = authorB.novelValidate.flatMap(novel => novel.segments)
+    val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
+    classifier.test(segmentsA ++ segmentsB, labels)
+  }
+
   /**
-    * If classifier is persisted, loads it from database, otherwise, train the given classifier on the author data
+    * If classifier is persisted, loads it from database and return true
     * @param classifier A classifierWrapper that needs to have its parameters loaded
-    * @param authorA The first author we want to compare
-    * @param authorB The second author we want to compare
+    * @param collectionName Name of collection to access
     */
-  def loadClassifier(classifier: ClassifierWrapper[Segment], authorA: Author, authorB: Author) = {
-    Await.result(trainingDao.getClassifierParams(), Duration(5, TimeUnit.SECONDS)) match {
-      case Some((w, b)) => classifier.loadParams(w, b)
-      case None => train(classifier, authorA, authorB)
+  def loadClassifier(classifier: LinearClassifierWrapper[Segment], collectionName: String): Boolean = {
+    Await.result(trainingDao.getClassifierParams(collectionName), Duration(5, TimeUnit.SECONDS)) match {
+      case Some((w, b)) =>
+        classifier.loadParams(w, b)
+        true
+      case None => false
     }
   }
+
+  def persistClassifier(classifier: LinearClassifierWrapper[Segment], collectionName: String): Boolean =
+    trainingDao.persistClassifierParams(classifier.classifier.w, classifier.classifier.b, collectionName)
+
 }

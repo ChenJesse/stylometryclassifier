@@ -22,14 +22,15 @@ class TrainingDaoSpec extends PlaySpec with OneAppPerSuite {
 
     "be able to store and retrieve parameter information" in {
       val trainingDao = app.injector.instanceOf[TrainingDao]
+      val collectionName = "testTrainingDao"
 
-      trainingDao.clearClassifierParams
+      trainingDao.clearClassifierParams(collectionName)
 
-      var params = Await.result(trainingDao.getClassifierParams(), Duration(5, TimeUnit.SECONDS))
+      var params = Await.result(trainingDao.getClassifierParams(collectionName), Duration(5, TimeUnit.SECONDS))
       params mustBe None
 
-      trainingDao.persistClassifierParams(DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23)
-      params = Await.result(trainingDao.getClassifierParams(), Duration(5, TimeUnit.SECONDS))
+      trainingDao.persistClassifierParams(DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23, collectionName)
+      params = Await.result(trainingDao.getClassifierParams(collectionName), Duration(5, TimeUnit.SECONDS))
       params mustBe Some(DenseVector(List(1.0, 2.0, 3.0, 4.0).toArray), 1.23)
     }
 

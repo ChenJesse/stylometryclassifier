@@ -23,8 +23,8 @@ class NameGenderSpec extends PlaySpec {
       val nbClassifier = new NaiveBayesClassifier(dimension)
       val lrClassifier = new LogisticRegressionClassifier(dimension, Some(Regularization(1, L2Reg)))
 
-      val nbClassifierWrapper = new ClassifierWrapper[Name](nbClassifier)
-      val lrClassifierWrapper = new ClassifierWrapper[Name](lrClassifier)
+      val nbClassifierWrapper = new LinearClassifierWrapper[Name](nbClassifier)
+      val lrClassifierWrapper = new LinearClassifierWrapper[Name](lrClassifier)
 
       nbClassifierWrapper.train(all, labels)
       lrClassifierWrapper.train(all, labels)

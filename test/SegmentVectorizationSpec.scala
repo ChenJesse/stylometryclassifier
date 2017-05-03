@@ -1,5 +1,5 @@
 import classifiers.BinaryLabel.{LabelA, LabelB}
-import classifiers.{ClassifierWrapper, LogisticRegressionClassifier, Regularization}
+import classifiers.{LinearClassifierWrapper, LogisticRegressionClassifier, Regularization}
 import edu.stanford.nlp.simple.{Document, Sentence}
 import models.{Author, Martin, Segment, Tolkien}
 import org.scalatestplus.play.PlaySpec
@@ -22,15 +22,13 @@ class SegmentVectorizationSpec extends PlaySpec {
 
       segments.length mustBe 5
       segments.flatMap(segment => segment.sentences) mustBe sentences
-      println(segments.head.sentences)
-      println(segments.head.sentences.map(_.posTags()))
       segments.flatMap(segment => segment.sentences.map(_.toString)).mkString(" ") mustBe novelText
     }
 
     "should be able to parse a novel correctly" in {
       case object TestMartin extends Author {
         val name = "Martin"
-        override val novelData = Seq("agameofthrones")
+        override val novelDataTrain = Seq("agameofthrones")
       }
 
       TestMartin.loadNovels
@@ -40,24 +38,6 @@ class SegmentVectorizationSpec extends PlaySpec {
 
       val reconstructedText = TestMartin.novels.head.segments.flatMap(_.sentences.map(_.toString)).mkString(" ")
       val text = scala.io.Source.fromFile("app/resources/training/agameofthrones.txt").mkString
-      println(reconstructedText.length)
-      println(text.length)
     }
-
-    //TAKES TOO LONG TO RUN, APPROX 20 MIN
-//    "should be able to classify Tolkien vs Martin with reasonably training error" in {
-//      Tolkien.loadNovels
-//      Martin.loadNovels
-//      Tolkien.novels.foreach(novel => novel.loadSegments())
-//      Martin.novels.foreach(novel => novel.loadSegments())
-//      val segmentsA = Tolkien.novels.flatMap(novel => novel.segments)
-//      val segmentsB = Martin.novels.flatMap(novel => novel.segments)
-//      val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
-//      val classifier = new ClassifierWrapper[Segment](
-//        new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
-//      )
-//      classifier.train(segmentsA ++ segmentsB, labels)
-//      println(classifier.test(segmentsA ++ segmentsB, labels))
-//    }
   }
 }

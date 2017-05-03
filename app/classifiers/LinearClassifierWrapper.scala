@@ -7,7 +7,7 @@ import models.Vectorizable
   * Created by jessechen on 4/23/17.
   */
 
-class ClassifierWrapper[T <: Vectorizable](classifier: Classifier) {
+class LinearClassifierWrapper[T <: Vectorizable](val classifier: LinearClassifier) {
   def train(xTr: Seq[T], yTr: Seq[Label]) = {
     val xTrMatrix = seqToMatrix(xTr)
     val yTrVector = seqLabelToVector(yTr)

@@ -46,6 +46,11 @@ class Segment(val sentences: List[Sentence]) extends Vectorizable {
 }
 
 object Segment {
+  def apply(text: String) = {
+    val sentences = new Document(text).sentences().toArray.toList.asInstanceOf[List[Sentence]]
+    new Segment(sentences)
+  }
+
   val partsOfSpeech = scala.io.Source.fromFile("app/resources/training/pos.txt").mkString.split("\n").map(_.trim())
   val commonConjunctions = List("for", "and", "nor", "but", "or", "yet", "so")
   val commonPronouns = List("she", "he", "her", "him", "his", "hers")

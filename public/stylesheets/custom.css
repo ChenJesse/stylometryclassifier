@@ -1,0 +1,27 @@
+textarea {
+    height: 150px;
+    width: 90%
+}
+
+#classify-button {
+    width: 90%;
+    margin-bottom: 30px;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 200;
+}
+
+p {
+    font-weight: 200;
+}
+
+#wrapper {
+    background-color: #d9d9d9;
+}
+
+#classify-container {
+    width: 50%;
+    background-color: #e6e6e6;
+    margin-top: 20px;
+}

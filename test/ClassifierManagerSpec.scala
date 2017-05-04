@@ -11,7 +11,7 @@ class ClassifierManagerSpec extends PlaySpec with OneAppPerSuite {
 
     "be able to train logistic regression classifiers while interacting with MongoDB to load and store classifiers" in {
       val classifierManager = app.injector.instanceOf[ClassifierManager]
-      val collectionName = "thirdbookvalidation"
+      val collectionName = "tolkienmartinLR"
       val classifier = new LinearClassifierWrapper[Segment](
         new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
       )
@@ -28,7 +28,7 @@ class ClassifierManagerSpec extends PlaySpec with OneAppPerSuite {
 
     "be able to train naive bayes classifiers while interacting with MongoDB to load and store classifiers" in {
       val classifierManager = app.injector.instanceOf[ClassifierManager]
-      val collectionName = "thirdbookvalidationNB"
+      val collectionName = "tolkienmartinNB"
       val classifier = new LinearClassifierWrapper[Segment](
         new NaiveBayesClassifier(Segment.defaultDimension)
       )
@@ -40,7 +40,7 @@ class ClassifierManagerSpec extends PlaySpec with OneAppPerSuite {
       println("Finished training!")
       val validationError = classifierManager.validate(classifier, Tolkien, Martin)
       println("Naive Bayes validation error: " + validationError)
-      assert(validationError < 0.15)
+      assert(validationError < 0.20)
     }
   }
 }

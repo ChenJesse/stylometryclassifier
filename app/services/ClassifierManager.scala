@@ -20,8 +20,14 @@ class ClassifierManager @Inject()(trainingDao: TrainingDao) {
     Martin.loadNovels
     authorA.novelTrain.foreach(novel => novel.loadSegments())
     authorB.novelTrain.foreach(novel => novel.loadSegments())
-    val segmentsA = authorA.novelTrain.flatMap(novel => novel.segments)
-    val segmentsB = authorB.novelTrain.flatMap(novel => novel.segments)
+    var segmentsA = authorA.novelTrain.flatMap(novel => novel.segments)
+    var segmentsB = authorB.novelTrain.flatMap(novel => novel.segments)
+    balanceData(segmentsA, segmentsB) match {
+      case (slicedA, slicedB) =>
+        segmentsA = slicedA
+        segmentsB = slicedB
+      case _ =>
+    }
     val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
     classifier.train(segmentsA ++ segmentsB, labels)
   }
@@ -31,8 +37,14 @@ class ClassifierManager @Inject()(trainingDao: TrainingDao) {
     Martin.loadNovels
     authorA.novelValidate.foreach(novel => novel.loadSegments())
     authorB.novelValidate.foreach(novel => novel.loadSegments())
-    val segmentsA = authorA.novelValidate.flatMap(novel => novel.segments)
-    val segmentsB = authorB.novelValidate.flatMap(novel => novel.segments)
+    var segmentsA = authorA.novelValidate.flatMap(novel => novel.segments)
+    var segmentsB = authorB.novelValidate.flatMap(novel => novel.segments)
+    balanceData(segmentsA, segmentsB) match {
+      case (slicedA, slicedB) =>
+        segmentsA = slicedA
+        segmentsB = slicedB
+      case _ =>
+    }
     val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
     classifier.test(segmentsA ++ segmentsB, labels)
   }
@@ -53,5 +65,10 @@ class ClassifierManager @Inject()(trainingDao: TrainingDao) {
 
   def persistClassifier(classifier: LinearClassifierWrapper[Segment], collectionName: String): Boolean =
     trainingDao.persistClassifierParams(classifier.classifier.w, classifier.classifier.b, collectionName)
+
+  private def balanceData(segmentsA: Seq[Segment], segmentsB: Seq[Segment]): (Seq[Segment], Seq[Segment]) = {
+    val slice = Math.min(segmentsA.length, segmentsB.length)
+    (segmentsA.slice(0, slice), segmentsB.slice(0, slice))
+  }
 
 }

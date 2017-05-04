@@ -31,8 +31,8 @@ case object Tolkien extends Author {
 case object Martin extends Author {
   val name = "Martin"
   override val novelDataTrain = Seq(
-    "agameofthrones",
-    "aclashofkings"
+    "agameofthrones"
+//    "aclashofkings"
   )
   override val novelDataValidate: Seq[String] = Seq(
     "astormofswords"

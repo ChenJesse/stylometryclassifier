@@ -7,7 +7,7 @@
     <p class="text-center">Binary classification done with logistic regression, leveraging Stanford's CoreNLP as well as
         several in-house feature extraction techniques. Trained classifier on the first two books in
         both "The Lord of the Rings" and "A Song of Ice and Fire", being divided into 10-sentence segments.
-        Validation error on the third book in both series was less than 7%.</p>
+        Validation error on the third book in both series was less than 6%.</p>
 
     <div class="row">
         <div class="col"></div>
@@ -16,6 +16,16 @@
             <textarea id="input" class="center-block .form-control" "rows="30" cols="50"></textarea>
             <br>
             <button id="classify-button" class="btn btn-default center-block" type="button">Classify</button>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row">
+        <div class="col"></div>
+        <div class="col">
+            <h3 id="author-result2" class="text-center">Classify Collins vs Roth's writing styles. 10 sentences is optimal.</h3>
+            <textarea id="input" class="center-block .form-control" "rows="30" cols="50"></textarea>
+            <br>
+            <button id="classify-button2" class="btn btn-default center-block" type="button">Classify</button>
         </div>
         <div class="col"></div>
     </div>

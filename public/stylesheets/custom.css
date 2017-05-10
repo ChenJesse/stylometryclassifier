@@ -3,7 +3,7 @@ textarea {
     width: 90%
 }
 
-#classify-button {
+#classify-button, #classify-button2 {
     width: 90%;
     margin-bottom: 30px;
 }

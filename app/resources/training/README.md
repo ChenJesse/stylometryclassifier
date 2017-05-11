@@ -1,0 +1,1 @@
+Place training data in raw .txt form in this folder and create appropriate author objects for it.

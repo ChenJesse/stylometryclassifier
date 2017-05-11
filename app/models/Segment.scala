@@ -51,7 +51,7 @@ object Segment {
     new Segment(sentences)
   }
 
-  val partsOfSpeech = scala.io.Source.fromFile("app/resources/training/pos.txt").mkString.split("\n").map(_.trim())
+  val partsOfSpeech = scala.io.Source.fromFile("app/resources/pos.txt").mkString.split("\n").map(_.trim())
   val commonConjunctions = List("for", "and", "nor", "but", "or", "yet", "so")
   val commonPronouns = List("she", "he", "her", "him", "his", "hers")
   val defaultDimension = 70

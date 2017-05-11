@@ -5,11 +5,16 @@ Spectrum is a platform that leverages Stanford CoreNLP and in-house machine lear
 
 The platform is written with robustness and generalization in mind, so that it can ingest any pieces of writing as txt files, and train classifiers for them. Our implementation of Tolkien vs Martin is simply an example of what the platform can do.
 
+Currently, it supports SVM, logistic regression, and naive bayes.
+
 ### Stack
 - Play Framework for backend
 - Breeze as numerical processing library for writing classifiers
 - MongoDB for classifier persistence
 - jQuery for frontend
+
+![Alt text](img/architecture.jpg?raw=true "Architecture")
+
 
 ## Installation
 

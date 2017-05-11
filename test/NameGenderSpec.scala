@@ -22,19 +22,25 @@ class NameGenderSpec extends PlaySpec {
 
       val nbClassifier = new NaiveBayesClassifier(dimension)
       val lrClassifier = new LogisticRegressionClassifier(dimension, Some(Regularization(1, L2Reg)))
+      val svmClassifier = new SVMClassifier(dimension, Some(Regularization(1, L2Reg)))
 
       val nbClassifierWrapper = new LinearClassifierWrapper[Name](nbClassifier)
       val lrClassifierWrapper = new LinearClassifierWrapper[Name](lrClassifier)
+      val svmClassifierWrapper = new LinearClassifierWrapper[Name](svmClassifier)
 
       nbClassifierWrapper.train(all, labels)
       lrClassifierWrapper.train(all, labels)
+      svmClassifierWrapper.train(all, labels)
 
       val nbTrainingError = nbClassifierWrapper.test(all, labels)
       val lrTrainingError = lrClassifierWrapper.test(all, labels)
+      val svmTrainingError = svmClassifierWrapper.test(all, labels)
       println("Naive bayes training error: " + nbTrainingError)
       println("Logistic regression training error: " + lrTrainingError)
+      println("SVM training error: " + svmTrainingError)
       assert(nbTrainingError < 0.10)
       assert(lrTrainingError < 0.10)
+      assert(svmTrainingError < 0.10)
 
       val xTe = List(
         new Name("Julian"),
@@ -46,6 +52,7 @@ class NameGenderSpec extends PlaySpec {
 
       val yNB = nbClassifierWrapper.classify(xTe).toArray
       val yLR = lrClassifierWrapper.classify(xTe).toArray
+      val ySVM = svmClassifierWrapper.classify(xTe).toArray
       yNB.length mustBe 5
       yLR.length mustBe 5
       yNB(0) mustBe LabelA
@@ -59,6 +66,12 @@ class NameGenderSpec extends PlaySpec {
       yLR(2) mustBe LabelB
       yLR(3) mustBe LabelB
       yLR(4) mustBe LabelB
+
+      ySVM(0) mustBe LabelA
+      ySVM(1) mustBe LabelA
+      ySVM(2) mustBe LabelB
+      ySVM(3) mustBe LabelB
+      ySVM(4) mustBe LabelB
     }
 
   }

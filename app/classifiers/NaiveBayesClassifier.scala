@@ -6,7 +6,7 @@ import breeze.numerics.log
 /**
   * Created by jessechen on 3/28/17.
   */
-class NaiveBayesClassifier(dimension: Int) extends LinearClassifier {
+class NaiveBayesClassifier(dimension: Int) extends LinearClassifier(dimension) {
 
   var w = DenseVector.ones[Double](dimension)
   var b = 0.0

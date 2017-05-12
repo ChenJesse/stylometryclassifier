@@ -1,11 +1,11 @@
 package classifiers
 
-import breeze.linalg.{*, DenseMatrix, DenseVector}
+import breeze.linalg.{*, DenseMatrix, DenseVector, norm}
 
 /**
   * Created by jessechen on 4/17/17.
   */
-abstract class LinearClassifier extends Classifier {
+abstract class LinearClassifier(dimension: Int) extends Classifier {
   var w: DenseVector[Double]
   var b: Double
 
@@ -33,5 +33,29 @@ abstract class LinearClassifier extends Classifier {
   def loadParams(newW: DenseVector[Double], newB: Double): Unit = {
     w = newW
     b = newB
+  }
+
+  /**
+    *
+    * @param lossFunc A loss function that returns the gradient at the given y
+    * @param alpha Step size
+    * @param maxiter Number of iterations before automatically breaking out of loop
+    * @param delta Change in w before automatically ending loop
+    * @param xTr Training set, nxd
+    * @param yTr Labels corresponding to training set, 1xn
+    */
+  def adagrad(lossFunc: ((DenseMatrix[Double], DenseVector[Int]) => DenseVector[Double]),
+                      alpha: Double, maxiter: Int, delta: Double,
+                      xTr: DenseMatrix[Double], yTr: DenseVector[Int]): Unit = {
+    var z = DenseVector.zeros[Double](dimension)
+    for (_ <- 1 until maxiter) {
+      val gradient = lossFunc(xTr, yTr)
+      z = z + gradient.map {x => x * x}
+      val zEps = z :+= 0.0001
+      val alphaGradient = gradient :*= alpha
+      val newW = w - alphaGradient /:/ zEps.map(x => Math.sqrt(x))
+      if (norm(gradient) < delta) return
+      w = newW
+    }
   }
 }

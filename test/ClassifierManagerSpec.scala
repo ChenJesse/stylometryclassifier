@@ -1,3 +1,4 @@
+import classifiers.BinaryLabel.LabelA
 import classifiers._
 import models._
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
@@ -58,6 +59,24 @@ class ClassifierManagerSpec extends PlaySpec with OneAppPerSuite {
       val validationError = classifierManager.validate(classifier, Tolkien, Martin)
       println("Naive Bayes validation error: " + validationError)
       assert(validationError < 0.20)
+    }
+
+    "be able to test another Tolkien novel with logistic regression" in {
+      val classifierManager = app.injector.instanceOf[ClassifierManager]
+      val collectionName = "tolkienmartinLR"
+      val classifier = new LinearClassifierWrapper[Segment](
+        new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
+      )
+
+      if (!classifierManager.loadClassifier(classifier, collectionName)) {
+        classifierManager.train(classifier, Tolkien, Martin)
+        classifierManager.persistClassifier(classifier, collectionName)
+      }
+      val hobbitError = classifierManager.testNovel(classifier, Tolkien, LabelA, "thehobbit")
+      assert(hobbitError < 0.35)
+
+      val silmarillionError = classifierManager.testNovel(classifier, Tolkien, LabelA, "thesilmarillion")
+      assert(silmarillionError < 0.05)
     }
 
     "be able to train LR for Collins and Roth" in {

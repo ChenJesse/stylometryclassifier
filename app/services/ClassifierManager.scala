@@ -3,9 +3,9 @@ package services
 import java.util.concurrent.TimeUnit
 
 import classifiers.BinaryLabel.{LabelA, LabelB}
-import classifiers.LinearClassifierWrapper
+import classifiers.{Label, LinearClassifierWrapper}
 import com.google.inject.{Inject, Singleton}
-import models.{Author, Martin, Segment, Tolkien, Collins, Roth}
+import models._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -49,6 +49,21 @@ class ClassifierManager @Inject()(trainingDao: TrainingDao) {
     }
     val labels = segmentsA.map(_ => LabelA) ++ segmentsB.map(_ => LabelB)
     classifier.test(segmentsA ++ segmentsB, labels)
+  }
+
+  /**
+    *
+    * @param classifier The classifer to use
+    * @param author The author of the novel we want to test on
+    * @param label The given label associated with the author that classifier was trained on
+    * @param novelName Name of the novel file ex. "thehobbit"
+    * @return
+    */
+  def testNovel(classifier: LinearClassifierWrapper[Segment],
+           author: Author, label: Label, novelName: String): Double = {
+    val novel = new Novel(novelName, author.segmentLength)
+    novel.loadSegments()
+    classifier.test(novel.segments, novel.segments.map(_ => label))
   }
 
   /**

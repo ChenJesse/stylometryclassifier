@@ -15,7 +15,6 @@ import services.ClassifierManager
 class ClassifyController @Inject() (val classifierManager: ClassifierManager) extends Controller {
   val collectionName = "thirdbookvalidation"
 
-  //first classifier for Tolkien and Martin
   val defaultClassifierTM = new LinearClassifierWrapper[Segment](
     new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
   )
@@ -24,7 +23,7 @@ class ClassifyController @Inject() (val classifierManager: ClassifierManager) ex
     classifierManager.train(defaultClassifierTM, Tolkien, Martin)
     classifierManager.persistClassifier(defaultClassifierTM, collectionName)
   }
-  //second classifier for Collins and Roth
+
   val defaultClassifierRC = new LinearClassifierWrapper[Segment](
     new LogisticRegressionClassifier(Segment.defaultDimension, Option(Regularization()))
   )
@@ -34,7 +33,7 @@ class ClassifyController @Inject() (val classifierManager: ClassifierManager) ex
     classifierManager.persistClassifier(defaultClassifierRC, collectionName)
   }
 
-  def classify_tolkien_martin = Action { request =>
+  def classifyTolkienMartin = Action { request =>
     val message = request.body.asJson.get
     val segment = Segment.apply((message \ "segment").as[String])
     val prediction = defaultClassifierTM.classify(Seq(segment))
@@ -45,7 +44,7 @@ class ClassifyController @Inject() (val classifierManager: ClassifierManager) ex
     Ok(author)
   }
 
-  def classify_roth_collins = Action { request =>
+  def classifyRothCollins = Action { request =>
     val message = request.body.asJson.get
     val segment = Segment.apply((message \ "segment").as[String])
     val prediction = defaultClassifierRC.classify(Seq(segment))
